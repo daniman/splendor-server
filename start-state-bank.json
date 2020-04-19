@@ -1,8 +1,26 @@
 {
-  "RED": 7,
-  "BLUE": 7,
-  "GREEN": 7,
-  "BLACK": 7,
-  "WHITE": 7,
-  "YELLOW": 5
+  "2": {
+    "RED": 4,
+    "BLUE": 4,
+    "GREEN": 4,
+    "BLACK": 4,
+    "WHITE": 4,
+    "YELLOW": 5
+  },
+  "3": {
+    "RED": 5,
+    "BLUE": 5,
+    "GREEN": 5,
+    "BLACK": 5,
+    "WHITE": 5,
+    "YELLOW": 5
+  },
+  "4": {
+    "RED": 7,
+    "BLUE": 7,
+    "GREEN": 7,
+    "BLACK": 7,
+    "WHITE": 7,
+    "YELLOW": 5
+  }
 }
