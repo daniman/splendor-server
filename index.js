@@ -1,22 +1,22 @@
 const { ApolloServer, ApolloError } = require('apollo-server');
 const typeDefs = require('./schema');
-const Game = require('./Game');
+const Game = require('./models/Game');
 
 /**
- * Fill in all the turn types.
+ * Implement purchase turn type logic.
  *
- * Figure out how to enforce an ordering of turns for the players, so players
- * can't make actions outside their turn.
+ * Implement turn switching and the enforcement of turn ordering.
  *
  * Figure out how to instantiate more than one game in memory.
+ * Implement "instantiate game on demand", so we can have multiple rooms.
  *
  * Implement "winner" logic.
  *
- * Simplify mutation Turn API to not need to accept TurnType, as it can be inferred.
- *    playerId: ID!,
-      type: TurnType!,
-      takeTwoCoinsInput: TakeTwoCoinsInput,
-      takeThreeCoinsInput: TakeThreeCoinsInput
+ * Implement Nobles logic.
+ *
+ * Clean up models. Maybe switch from in-memory to using a DB.
+ *
+ * Figure out why Type II cards only have 29 cards, not 30.
  */
 
 const games = [new Game('The Game')];
@@ -27,12 +27,30 @@ const resolvers = {
       return games.find((g) => `${g.id}` === args.id);
     },
   },
+  Card: {
+    cost: (card) => {
+      const { id, gemColor, pointValue, ...cost } = card;
+      return Object.keys(cost).map((gemColor) => ({
+        gemColor,
+        quantity: cost[gemColor],
+      }));
+    },
+  },
+  CardStack: {
+    remaining: (stack) => stack.cards.hidden.length,
+    cards: (stack) => stack.cards.visible,
+  },
   Game: {
-    bank: (game) => {
-      return Object.keys(game.bank).map((gemColor) => ({
+    bank: (game) =>
+      Object.keys(game.bank).map((gemColor) => ({
         gemColor,
         quantity: game.bank[gemColor],
-      }));
+      })),
+    player: (game, args) => {
+      const player = game.players.find((p) => p.id === args.id);
+      if (!player)
+        throw new ApolloError(`Could not find player with ID: ${args.id}`);
+      return player;
     },
   },
   Turn: {
@@ -57,12 +75,11 @@ const resolvers = {
     },
   },
   Player: {
-    bank: (player) => {
-      return Object.keys(player.bank).map((gemColor) => ({
+    bank: (player) =>
+      Object.keys(player.bank).map((gemColor) => ({
         gemColor,
         quantity: player.bank[gemColor],
-      }));
-    },
+      })),
   },
   Mutation: {
     game: (_parent, args) => {
@@ -91,9 +108,9 @@ const resolvers = {
       }
     },
     takeTurn(game, args) {
-      const { playerId, type, ...context } = args;
+      const { playerId, ...context } = args;
       try {
-        game.takeTurn(playerId, type, context);
+        game.takeTurn(playerId, context);
         return game;
       } catch (e) {
         throw new ApolloError(e.message);
@@ -102,7 +119,14 @@ const resolvers = {
   },
 };
 
-const server = new ApolloServer({ typeDefs, resolvers });
+const server = new ApolloServer({
+  typeDefs,
+  resolvers,
+  engine: {
+    schemaTag: 'local',
+    apiKey: 'service:splendor:SaDSZzGf0avhRcSqD8z_Mg',
+  },
+});
 
 server.listen().then(({ url }) => {
   console.log(`🚀  Server ready at ${url}`);

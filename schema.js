@@ -1,10 +1,12 @@
 module.exports = `
   type TakeTwoCoins implements Turn {
+    playerId: ID!
     type: TurnType!
     gemColor: GemColor!
   }
 
   type TakeThreeCoins implements Turn {
+    playerId: ID!
     type: TurnType!
     gem1Color: GemColor!
     gem2Color: GemColor!
@@ -12,16 +14,19 @@ module.exports = `
   }
 
   type ReserveCard implements Turn {
+    playerId: ID!
     type: TurnType!
     id: ID!
   }
 
   type PurchaseCard implements Turn {
+    playerId: ID!
     type: TurnType!
     id: ID!
   }
 
   interface Turn {
+    playerId: ID!
     type: TurnType!
   }
 
@@ -53,11 +58,17 @@ module.exports = `
     cost: [CostUnit!]!
   }
 
+  enum CardStackType {
+    I
+    II
+    III
+    NOBLE
+  }
+
   type CardStack {
-    I: [Card!]!
-    II: [Card!]!
-    III: [Card!]!
-    Noble: [Card!]!
+    type: CardStackType!
+    remaining: Int!
+    cards: [Card!]!
   }
 
   enum GameState {
@@ -70,15 +81,18 @@ module.exports = `
     id: ID!
     state: GameState!
     name: String!
-    cards: CardStack!
-    bank: [CostUnit!]!
+    stacks: [CardStack!]!
     players: [Player!]!
+    player(id: ID!): Player
+    bank: [CostUnit!]!
     turns: [Turn!]!
   }
 
   type Player {
     id: ID!
     bank: [CostUnit!]!
+    reservedCards: [Card!]!
+    purchasedCArds: [Card!]!
   }
 
   type Query {
@@ -93,10 +107,11 @@ module.exports = `
     start: Game
     join(playerId: ID!): Game
     takeTurn(
-      playerId: ID!,
-      type: TurnType!,
-      takeTwoCoinsInput: TakeTwoCoinsInput,
-      takeThreeCoinsInput: TakeThreeCoinsInput
+      playerId: ID!
+      takeTwoCoins: TakeTwoCoinsInput
+      takeThreeCoins: TakeThreeCoinsInput
+      reserveCardById: ID
+      purchaseCardById: ID
     ): Game
   }
 
@@ -108,13 +123,5 @@ module.exports = `
     gem1Color: GemColor!
     gem2Color: GemColor!
     gem3Color: GemColor!
-  }
-
-  input ReserveCardInput {
-    id: ID!
-  }
-
-  input PurchaseCardInput {
-    id: ID!
   }
 `;

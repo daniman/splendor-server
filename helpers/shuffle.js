@@ -16,13 +16,5 @@ module.exports = function shuffle(arr) {
     }
   }
 
-  return copy.map(({ id, gemColor, pointValue, ...coinCost }) => ({
-    id,
-    gemColor,
-    pointValue,
-    cost: Object.keys(coinCost).map((gemColor) => ({
-      gemColor,
-      quantity: coinCost[gemColor],
-    })),
-  }));
+  return copy;
 };
