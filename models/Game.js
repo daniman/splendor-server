@@ -17,11 +17,9 @@ class Game {
 
     this.bank = [];
 
-    this.stacks = [
-      {
-        type: 'NOBLE',
-        cards: new Stack(cardStart.Noble, 5),
-      },
+    this.nobles = new Stack(cardStart.Noble, 5);
+
+    this.cardStacks = [
       {
         type: 'III',
         cards: new Stack(cardStart.III, 4),
@@ -83,17 +81,17 @@ class Game {
     if (!player)
       throw new Error(`There is no player with ID <${playerId}> in this game.`);
 
-    if (!!turnContext.takeTwoCoins) {
+    if (!!turnContext.takeTwoGems) {
       /**
-       * Turn: TAKE_TWO_COINS
+       * Turn: TAKE_TWO_GEMS
        */
 
-      const { gemColor } = turnContext.takeTwoCoins;
+      const gemColor = turnContext.takeTwoGems;
 
       try {
         if (this.bank[gemColor] < 4) {
           throw new Error(
-            `Cannot take 2 coins from the ${gemColor} stack when there are only ${this.bank[gemColor]} available.`
+            `Cannot take 2 gems from the ${gemColor} stack when there are only ${this.bank[gemColor]} available.`
           );
         }
 
@@ -102,18 +100,18 @@ class Game {
 
         this.turns.push({
           playerId,
-          type: 'TAKE_TWO_COINS',
-          ...turnContext.takeTwoCoins,
+          type: 'TAKE_TWO_GEMS',
+          ...turnContext.takeTwoGems,
         });
       } catch (e) {
         throw new Error(e.message);
       }
-    } else if (!!turnContext.takeThreeCoins) {
+    } else if (!!turnContext.takeThreeGems) {
       /**
-       * Turn: TAKE_THREE_COINS
+       * Turn: TAKE_THREE_GEMS
        */
 
-      const { gem1Color, gem2Color, gem3Color } = turnContext.takeThreeCoins;
+      const [gem1Color, gem2Color, gem3Color] = turnContext.takeThreeGems;
 
       if (
         gem1Color === gem2Color ||
@@ -131,8 +129,8 @@ class Game {
 
         this.turns.push({
           playerId,
-          type: 'TAKE_THREE_COINS',
-          ...turnContext.takeThreeCoins,
+          type: 'TAKE_THREE_GEMS',
+          ...turnContext.takeThreeGems,
         });
       } catch (e) {
         throw new Error(e.message);
@@ -145,31 +143,30 @@ class Game {
       const id = turnContext.reserveCardById;
 
       let found = false;
-      this.stacks
-        .filter(({ type }) => type !== 'NOBLE')
-        .forEach(({ cards: stack }) => {
-          if (stack.showing(id)) {
-            try {
-              const card = stack.takeCard(id);
-              player.reserveCard(card);
+      this.cardStacks.forEach(({ cards }) => {
+        if (cards.showing(id)) {
+          try {
+            const card = cards.takeCard(id);
+            player.reserveCard(card);
 
-              if (this.bank.YELLOW > 0) {
-                this.bank.subtract('YELLOW', 1);
-                player.addGem('YELLOW', 1);
-              }
-
-              this.turns.push({
-                playerId,
-                type: 'RESERVE_CARD',
-                id,
-              });
-
-              found = true;
-            } catch (e) {
-              throw new Error(e.message);
+            if (this.bank.YELLOW > 0) {
+              this.bank.subtract('YELLOW', 1);
+              player.addGem('YELLOW', 1);
             }
+
+            this.turns.push({
+              playerId,
+              type: 'RESERVE_CARD',
+              id,
+            });
+
+            found = true;
+            return;
+          } catch (e) {
+            throw new Error(e.message);
           }
-        });
+        }
+      });
 
       if (!found)
         throw new Error(
@@ -180,7 +177,37 @@ class Game {
        * Turn: PURCHASE_CARD
        */
 
-      console.log('TODO: build PURCAHSE_CARD action');
+      const id = turnContext.purchaseCardById;
+
+      let found = false;
+      this.cardStacks.forEach(({ cards }) => {
+        if (cards.showing(id)) {
+          try {
+            const card = cards.takeCard(id);
+            const paidGems = player.purchaseCard(card);
+
+            paidGems.forEach(({ gemColor, quantity }) => {
+              this.bank.add(gemColor, quantity);
+            });
+
+            this.turns.push({
+              playerId,
+              type: 'PURCHASE_CARD',
+              id,
+            });
+
+            found = true;
+            return;
+          } catch (e) {
+            throw new Error(e.message);
+          }
+        }
+      });
+
+      if (!found)
+        throw new Error(
+          `Card ${turnContext.reserveCardById} is not available to reserve.`
+        );
     } else {
       throw new Error('Cannot execute a turn when no context was provided.');
     }

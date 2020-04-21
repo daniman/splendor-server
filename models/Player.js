@@ -22,8 +22,25 @@ class Player {
   }
 
   purchaseCard(card) {
-    // check for cost
-    // push to purchasedCards
+    const { id, gemColor: gemColorUnused, pointValue, ...cost } = card;
+
+    // Check that we have the resources to buy the card.
+    Object.keys(cost).forEach((gemColor) => {
+      if (this.bank[gemColor] < cost[gemColor])
+        throw new Error(
+          `Player "${id}" does not have enough ${gemColor} to purchase this card.`
+        );
+    });
+
+    this.purchasedCards.push(card);
+    Object.keys(cost).forEach((gemColor) => {
+      this.bank.subtract(gemColor, cost[gemColor]);
+    });
+
+    return Object.keys(cost).map((gemColor) => ({
+      gemColor,
+      quantity: cost[gemColor],
+    }));
   }
 }
 

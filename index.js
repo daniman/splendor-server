@@ -3,8 +3,6 @@ const typeDefs = require('./schema');
 const Game = require('./models/Game');
 
 /**
- * Implement purchase turn type logic.
- *
  * Implement turn switching and the enforcement of turn ordering.
  *
  * Figure out how to instantiate more than one game in memory.
@@ -14,9 +12,25 @@ const Game = require('./models/Game');
  *
  * Implement Nobles logic.
  *
+ * Make a Card model. Update Card resolver and Player and Game purchasing
+ * logic as a result, instead of spreading the ...cost object and mapping keys everywhere.
+ *
+ * Implement "max 10 coins" logic. Maybe implement a "put back" aspect of the
+ * take coins mutation as a result.
+ *
+ * Don't allow YELLOW coins to be taken directly as coins from the bank.
+ *
+ * Implement YELLOW coin logic for purchasing.
+ *
+ * Build in purchased card values into card purchasing and Noble attraction.
+ *
  * Clean up models. Maybe switch from in-memory to using a DB.
  *
  * Figure out why Type II cards only have 29 cards, not 30.
+ *
+ * Have games clean themselves up when finished to save memory?
+ *
+ * Figure out how to turn this whole thing into TS with hot module reloading?
  */
 
 const games = [new Game('The Game')];
@@ -52,15 +66,18 @@ const resolvers = {
         throw new ApolloError(`Could not find player with ID: ${args.id}`);
       return player;
     },
+    nobles: (game) => game.nobles.visible,
+    cardStacks: (game, args) =>
+      game.cardStacks.filter((s) => s.type === args.type),
   },
   Turn: {
     __resolveType(obj) {
-      if (obj.type === 'TAKE_THREE_COINS') {
-        return 'TakeThreeCoins';
+      if (obj.type === 'TAKE_THREE_GEMS') {
+        return 'TakeThreeGems';
       }
 
-      if (obj.type === 'TAKE_TWO_COINS') {
-        return 'TakeTwoCoins';
+      if (obj.type === 'TAKE_TWO_GEMS') {
+        return 'TakeTwoGems';
       }
 
       if (obj.type === 'RESERVE_CARD') {
