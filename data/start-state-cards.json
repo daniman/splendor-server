@@ -493,6 +493,16 @@
       "id": "-2-2-3--1"
     },
     {
+      "WHITE": 0,
+      "BLUE": 2,
+      "GREEN": 3,
+      "RED": 0,
+      "BLACK": 3,
+      "pointValue": 1,
+      "gemColor": "BLUE",
+      "id": "-2-3--3-1"
+    },
+    {
       "WHITE": 2,
       "BLUE": 0,
       "GREEN": 0,

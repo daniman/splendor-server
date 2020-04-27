@@ -1,16 +1,8 @@
 module.exports = `
-  type TakeTwoGems implements Turn {
+  type TakeGems implements Turn {
     playerId: ID!
     type: TurnType!
-    gemColor: GemColor!
-  }
-
-  type TakeThreeGems implements Turn {
-    playerId: ID!
-    type: TurnType!
-    gem1Color: GemColor!
-    gem2Color: GemColor!
-    gem3Color: GemColor!
+    gems: [GemColor!]!
   }
 
   type ReserveCard implements Turn {
@@ -78,14 +70,16 @@ module.exports = `
 
   type Game {
     id: ID!
-    state: GameState!
-    name: String!
-    nobles: [Card!]!
-    cardStacks(type: CardStackType): [CardStack!]!
+    # The players in the game; returned in order of ranking.
+    # Ordering: 1st place, 2nd place, etc.
     players: [Player!]!
     player(id: ID!): Player
+    state: GameState!
+    name: String!
     bank: [CostUnit!]!
     turns: [Turn!]!
+    nobles: [Card!]!
+    cardStacks(type: CardStackType): [CardStack!]!
   }
 
   type Player {
@@ -93,6 +87,8 @@ module.exports = `
     bank: [CostUnit!]!
     reservedCards: [Card!]!
     purchasedCards: [Card!]!
+    nobles: [Card!]!
+    score: Int!
   }
 
   type Query {
@@ -108,8 +104,8 @@ module.exports = `
     join(playerId: ID!): Game
     takeTurn(
       playerId: ID!
-      takeTwoGems: GemColor
-      takeThreeGems: [GemColor]
+      takeGems: [GemColor!]
+      returnGems: [GemColor!]
       reserveCardById: ID
       purchaseCardById: ID
     ): Game

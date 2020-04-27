@@ -17,7 +17,37 @@ class Bank {
     const prev = this[color];
     if (prev - quantity < 0)
       throw new Error('Cannot remove coins from empty bank.');
+
     this[color] = prev - quantity;
+  }
+
+  state() {
+    return [
+      {
+        gemColor: 'RED',
+        quantity: this.RED,
+      },
+      {
+        gemColor: 'BLUE',
+        quantity: this.BLUE,
+      },
+      {
+        gemColor: 'GREEN',
+        quantity: this.GREEN,
+      },
+      {
+        gemColor: 'BLACK',
+        quantity: this.BLACK,
+      },
+      {
+        gemColor: 'WHITE',
+        quantity: this.WHITE,
+      },
+      {
+        gemColor: 'YELLOW',
+        quantity: this.YELLOW,
+      },
+    ];
   }
 }
 

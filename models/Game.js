@@ -5,6 +5,10 @@ const Player = require('./Player');
 const Bank = require('./Bank');
 const Stack = require('./Stack');
 
+const takeGemsTurn = require('./turns/TakeGems');
+const purchaseCardTurn = require('./turns/PurchaseCard');
+const reserveCardTurn = require('./turns/ReserveCard');
+
 class Game {
   constructor(name) {
     this.id = 1234;
@@ -14,10 +18,12 @@ class Game {
     this.name = name;
     this.state = 'LOBBY';
     this.players = [];
+    this.playerRankings = [];
+    this.winner = null;
 
-    this.bank = [];
+    this.bank = new Bank();
 
-    this.nobles = new Stack(cardStart.Noble, 5);
+    this.nobles = new Stack(cardStart.Noble, 5, true);
 
     this.cardStacks = [
       {
@@ -43,7 +49,7 @@ class Game {
 
     if (this.players.map((p) => p.id).includes(id))
       throw new Error(
-        `There is already a player with ID <${id}> in this game.`
+        `There is already a player with the name "${id}" in this game.`
       );
 
     if (this.state !== 'LOBBY')
@@ -66,151 +72,76 @@ class Game {
     const bank = bankStart[`${this.players.length}`];
 
     // initialize the bank
-    this.bank = new Bank();
     Object.keys(bank).forEach((gemColor) => {
       this.bank.add(gemColor, bank[gemColor]);
     });
   }
 
+  checkIfWon() {}
+
   takeTurn(playerId, turnContext) {
-    if (this.state !== 'ACTIVE')
+    if (this.state === 'LOBBY')
       throw new Error('Cannot take a turn in the game until it is started.');
+
+    if (this.state === 'COMPLETE')
+      throw new Error('This game is complete! No more turns can be taken.');
+
+    if (Object.keys(turnContext).length > 1)
+      throw new Error('Cannot provide context for more than one turn at once.');
 
     const player = this.players.find((p) => p.id === playerId);
 
     if (!player)
       throw new Error(`There is no player with ID <${playerId}> in this game.`);
 
-    if (!!turnContext.takeTwoGems) {
-      /**
-       * Turn: TAKE_TWO_GEMS
-       */
+    const {
+      takeGems,
+      returnGems, // TODO: handle the case where a user is trying to return gems too
+      reserveCardById,
+      purchaseCardById,
+    } = turnContext;
 
-      const gemColor = turnContext.takeTwoGems;
+    if (!!takeGems) {
+      takeGemsTurn(this.bank, player, takeGems);
 
-      try {
-        if (this.bank[gemColor] < 4) {
-          throw new Error(
-            `Cannot take 2 gems from the ${gemColor} stack when there are only ${this.bank[gemColor]} available.`
-          );
-        }
-
-        this.bank.subtract(gemColor, 2);
-        player.addGem(gemColor, 2);
-
-        this.turns.push({
-          playerId,
-          type: 'TAKE_TWO_GEMS',
-          ...turnContext.takeTwoGems,
-        });
-      } catch (e) {
-        throw new Error(e.message);
-      }
-    } else if (!!turnContext.takeThreeGems) {
-      /**
-       * Turn: TAKE_THREE_GEMS
-       */
-
-      const [gem1Color, gem2Color, gem3Color] = turnContext.takeThreeGems;
-
-      if (
-        gem1Color === gem2Color ||
-        gem2Color === gem3Color ||
-        gem3Color === gem1Color
-      ) {
-        throw new Error('Cannot select two gems of the same color.');
-      }
-
-      try {
-        [gem1Color, gem2Color, gem3Color].forEach((gemColor) => {
-          this.bank.subtract(gemColor, 1);
-          player.addGem(gemColor, 1);
-        });
-
-        this.turns.push({
-          playerId,
-          type: 'TAKE_THREE_GEMS',
-          ...turnContext.takeThreeGems,
-        });
-      } catch (e) {
-        throw new Error(e.message);
-      }
-    } else if (!!turnContext.reserveCardById) {
-      /**
-       * Turn: RESERVE_CARD
-       */
-
-      const id = turnContext.reserveCardById;
-
-      let found = false;
-      this.cardStacks.forEach(({ cards }) => {
-        if (cards.showing(id)) {
-          try {
-            const card = cards.takeCard(id);
-            player.reserveCard(card);
-
-            if (this.bank.YELLOW > 0) {
-              this.bank.subtract('YELLOW', 1);
-              player.addGem('YELLOW', 1);
-            }
-
-            this.turns.push({
-              playerId,
-              type: 'RESERVE_CARD',
-              id,
-            });
-
-            found = true;
-            return;
-          } catch (e) {
-            throw new Error(e.message);
-          }
-        }
+      this.turns.push({
+        playerId,
+        type: 'TAKE_GEMS',
+        gems: takeGems,
       });
+    } else if (!!reserveCardById) {
+      reserveCardTurn(this.cardStacks, this.bank, player, reserveCardById);
 
-      if (!found)
-        throw new Error(
-          `Card ${turnContext.reserveCardById} is not available to reserve.`
-        );
-    } else if (!!turnContext.purchaseCardById) {
-      /**
-       * Turn: PURCHASE_CARD
-       */
-
-      const id = turnContext.purchaseCardById;
-
-      let found = false;
-      this.cardStacks.forEach(({ cards }) => {
-        if (cards.showing(id)) {
-          try {
-            const card = cards.takeCard(id);
-            const paidGems = player.purchaseCard(card);
-
-            paidGems.forEach(({ gemColor, quantity }) => {
-              this.bank.add(gemColor, quantity);
-            });
-
-            this.turns.push({
-              playerId,
-              type: 'PURCHASE_CARD',
-              id,
-            });
-
-            found = true;
-            return;
-          } catch (e) {
-            throw new Error(e.message);
-          }
-        }
+      this.turns.push({
+        playerId,
+        type: 'RESERVE_CARD',
+        id: reserveCardById,
       });
+    } else if (!!purchaseCardById) {
+      purchaseCardTurn(this.cardStacks, this.bank, player, purchaseCardById);
+      player.checkForNobles(this.nobles);
 
-      if (!found)
-        throw new Error(
-          `Card ${turnContext.reserveCardById} is not available to reserve.`
-        );
+      this.turns.push({
+        playerId,
+        type: 'PURCHASE_CARD',
+        id: purchaseCardById,
+      });
     } else {
       throw new Error('Cannot execute a turn when no context was provided.');
     }
+
+    // this.players.sort((playerL, playerR) => {
+    //   // if players have exactly the same score, the player with the least cards
+    //   // is in a better position and has the higher point value score.
+    //   if (playerR.score === playerL.score)
+    //     return playerR.purchasedCards.length - playerL.purchasedCards.length;
+    //   return playerR.score - playerL.score;
+    // });
+
+    // check for a winner
+    this.players.forEach((p) => {
+      if (p.score >= 15) this.state = 'COMPLETE';
+    });
   }
 }
 

@@ -3,37 +3,28 @@ const typeDefs = require('./schema');
 const Game = require('./models/Game');
 
 /**
- * Implement turn switching and the enforcement of turn ordering.
+ * Game logic:
+ * - Implement turn switching and the enforcement of turn ordering.
+ * - Implement turns where game is not complete until the last player has gone in a single turn round.
+ * - Implement "max 10 coins" logic.
+ * - Implement a "returnGems" aspect of the take coins mutation as a result.
+ * - Build a "reserve from top of the deck" pathway.
+ * - Look for TODOs.
  *
- * Figure out how to instantiate more than one game in memory.
- * Implement "instantiate game on demand", so we can have multiple rooms.
- *
- * Implement "winner" logic.
- *
- * Implement Nobles logic.
- *
- * Make a Card model. Update Card resolver and Player and Game purchasing
- * logic as a result, instead of spreading the ...cost object and mapping keys everywhere.
- *
- * Implement "max 10 coins" logic. Maybe implement a "put back" aspect of the
- * take coins mutation as a result.
- *
- * Don't allow YELLOW coins to be taken directly as coins from the bank.
- *
- * Implement YELLOW coin logic for purchasing.
- *
- * Build in purchased card values into card purchasing and Noble attraction.
- *
- * Clean up models. Maybe switch from in-memory to using a DB.
- *
- * Figure out why Type II cards only have 29 cards, not 30.
- *
- * Have games clean themselves up when finished to save memory?
- *
- * Figure out how to turn this whole thing into TS with hot module reloading?
+ * Implementation details:
+ * - Implement "instantiate game on demand" and hold multiple games at once.
+ * - Consider switching from in-memory to using a DB.
+ * - Have games clean themselves up when finished to save memory?
+ * - Figure out how to turn this whole thing into TS with hot module reloading?
  */
 
+// TODO: undo starter logic
 const games = [new Game('The Game')];
+games[0].addPlayer('dani');
+games[0].addPlayer('dani2');
+games[0].addPlayer('dani3');
+games[0].addPlayer('dani4');
+games[0].startGame();
 
 const resolvers = {
   Query: {
@@ -42,24 +33,14 @@ const resolvers = {
     },
   },
   Card: {
-    cost: (card) => {
-      const { id, gemColor, pointValue, ...cost } = card;
-      return Object.keys(cost).map((gemColor) => ({
-        gemColor,
-        quantity: cost[gemColor],
-      }));
-    },
+    cost: (card) => card.cost(),
   },
   CardStack: {
     remaining: (stack) => stack.cards.hidden.length,
     cards: (stack) => stack.cards.visible,
   },
   Game: {
-    bank: (game) =>
-      Object.keys(game.bank).map((gemColor) => ({
-        gemColor,
-        quantity: game.bank[gemColor],
-      })),
+    bank: (game) => game.bank.state(),
     player: (game, args) => {
       const player = game.players.find((p) => p.id === args.id);
       if (!player)
@@ -68,16 +49,14 @@ const resolvers = {
     },
     nobles: (game) => game.nobles.visible,
     cardStacks: (game, args) =>
-      game.cardStacks.filter((s) => s.type === args.type),
+      !!args.type
+        ? game.cardStacks.filter((s) => s.type === args.type)
+        : game.cardStacks,
   },
   Turn: {
     __resolveType(obj) {
-      if (obj.type === 'TAKE_THREE_GEMS') {
-        return 'TakeThreeGems';
-      }
-
-      if (obj.type === 'TAKE_TWO_GEMS') {
-        return 'TakeTwoGems';
+      if (obj.type === 'TAKE_GEMS') {
+        return 'TakeGems';
       }
 
       if (obj.type === 'RESERVE_CARD') {
@@ -92,11 +71,7 @@ const resolvers = {
     },
   },
   Player: {
-    bank: (player) =>
-      Object.keys(player.bank).map((gemColor) => ({
-        gemColor,
-        quantity: player.bank[gemColor],
-      })),
+    bank: (player) => player.bank.state(),
   },
   Mutation: {
     game: (_parent, args) => {
