@@ -9,13 +9,16 @@ const takeGemsTurn = require('./turns/TakeGems');
 const purchaseCardTurn = require('./turns/PurchaseCard');
 const reserveCardTurn = require('./turns/ReserveCard');
 
+const alphabet = 'abcdefghijklmnopqrstuvwxyz';
+
 class Game {
   constructor(name) {
-    this.id = 1234;
-    // TODO: proper ID generation
-    // this.id = Math.floor(Math.random() * 10000);
-
+    this.id = new Array(4)
+      .fill(0)
+      .map(() => alphabet[Math.floor(Math.random() * 26)])
+      .join('');
     this.name = name;
+
     this.state = 'LOBBY';
     this.players = [];
     this.playerRankings = [];
@@ -129,14 +132,6 @@ class Game {
     } else {
       throw new Error('Cannot execute a turn when no context was provided.');
     }
-
-    // this.players.sort((playerL, playerR) => {
-    //   // if players have exactly the same score, the player with the least cards
-    //   // is in a better position and has the higher point value score.
-    //   if (playerR.score === playerL.score)
-    //     return playerR.purchasedCards.length - playerL.purchasedCards.length;
-    //   return playerR.score - playerL.score;
-    // });
 
     // check for a winner
     this.players.forEach((p) => {

@@ -3,7 +3,7 @@ const shuffle = require('../helpers/shuffle');
 
 class Stack {
   constructor(cardArray, numShowing, dontReplace = false) {
-    const stack = shuffle(cardArray).map((card) => new Card(card));
+    const stack = shuffle(cardArray.slice()).map((card) => new Card(card));
 
     this.visible = stack.slice(0, numShowing);
     this.hidden = stack.slice(numShowing);

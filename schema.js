@@ -93,10 +93,12 @@ module.exports = `
 
   type Query {
     game(id: ID!): Game
+    allGames: [Game!]!
   }
 
   type Mutation {
     game(id: ID!): GameMutation
+    newGame(name: String!): Game
   }
 
   type GameMutation {

@@ -18,19 +18,13 @@ const Game = require('./models/Game');
  * - Figure out how to turn this whole thing into TS with hot module reloading?
  */
 
-// TODO: undo starter logic
-const games = [new Game('The Game')];
-games[0].addPlayer('dani');
-games[0].addPlayer('dani2');
-games[0].addPlayer('dani3');
-games[0].addPlayer('dani4');
-games[0].startGame();
+let games = [];
 
 const resolvers = {
   Query: {
-    game: (_parent, args, _context, _info) => {
-      return games.find((g) => `${g.id}` === args.id);
-    },
+    game: (_parent, args, _context, _info) =>
+      games.find((g) => `${g.id}` === args.id),
+    allGames: () => games,
   },
   Card: {
     cost: (card) => card.cost(),
@@ -76,9 +70,15 @@ const resolvers = {
   Mutation: {
     game: (_parent, args) => {
       const game = games.find((g) => `${g.id}` === args.id);
+      // const game = Object.keys(games).find((gameId) => `${gameId}` === args.id);
       if (!game)
         throw new ApolloError(`Could not find game with ID: ${args.gameId}`);
 
+      return game;
+    },
+    newGame: (_parent, args) => {
+      const game = new Game(args.name);
+      games.push(game);
       return game;
     },
   },
