@@ -14,12 +14,7 @@ const Game = require('./models/Game');
  * - Figure out how to turn this whole thing into TS with hot module reloading?
  */
 
-let games = [new Game('The Game')];
-games[0].addPlayer('dani');
-games[0].addPlayer('dani2');
-games[0].addPlayer('dani3');
-games[0].addPlayer('dani4');
-games[0].startGame();
+let games = [];
 
 const resolvers = {
   Query: {
