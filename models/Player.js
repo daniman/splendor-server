@@ -10,8 +10,12 @@ class Player {
     this.score = 0;
   }
 
-  addGem(gemColor, quantity) {
+  takeGem(gemColor, quantity) {
     this.bank.add(gemColor, quantity);
+  }
+
+  returnGem(gemColor, quantity) {
+    this.bank.subtract(gemColor, quantity);
   }
 
   reserveCard(card) {

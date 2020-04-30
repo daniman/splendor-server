@@ -4,8 +4,6 @@ const Game = require('./models/Game');
 
 /**
  * Game logic:
- * - Implement "max 10 coins" logic.
- * - Implement a "returnGems" aspect of the take coins mutation as a result.
  * - Build a "reserve from top of the deck" pathway.
  *
  * Implementation details:

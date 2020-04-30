@@ -103,25 +103,19 @@ class Game {
         `Sorry ${player}, it's not your turn... it's ${this.currentTurn.id}'s turn.`
       );
 
-    if (Object.keys(turnContext).length > 1)
-      throw new Error('Cannot provide context for more than one turn at once.');
-
     const player = this.players.find((p) => p.id === playerId);
-
     if (!player)
       throw new Error(`There is no player with ID <${playerId}> in this game.`);
 
-    const {
-      takeGems,
-      returnGems, // TODO: handle the case where a user is trying to return gems too
-      reserveCardById,
-      purchaseCardById,
-    } = turnContext;
+    const { returnGems, ...restOfTheContext } = turnContext;
+    if (Object.keys(restOfTheContext).length > 1)
+      throw new Error('Cannot provide context for more than one turn at once.');
+
+    const { takeGems, reserveCardById, purchaseCardById } = restOfTheContext;
 
     const context = {};
-
     if (!!takeGems) {
-      takeGemsTurn(this.bank, player, takeGems);
+      takeGemsTurn(this.bank, player, takeGems, returnGems);
 
       context.type = 'TAKE_GEMS';
       context.gems = takeGems;

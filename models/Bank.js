@@ -16,9 +16,15 @@ class Bank {
   subtract(color, quantity) {
     const prev = this[color];
     if (prev - quantity < 0)
-      throw new Error('Cannot remove coins from empty bank.');
+      throw new Error(`Cannot take ${color} gems when there are none to take.`);
 
     this[color] = prev - quantity;
+  }
+
+  gemCount() {
+    return (
+      this.RED + this.BLUE + this.GREEN + this.BLACK + this.WHITE + this.YELLOW
+    );
   }
 
   state() {

@@ -8,7 +8,7 @@ module.exports = (cardStacks, bank, player, cardId) => {
 
         if (bank.YELLOW > 0) {
           bank.subtract('YELLOW', 1);
-          player.addGem('YELLOW', 1);
+          player.takeGem('YELLOW', 1);
         }
 
         found = true;
