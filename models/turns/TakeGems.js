@@ -16,7 +16,7 @@ module.exports = (bank, player, takeGemList = [], returnGemList = []) => {
   console.log(player.bank.gemCount(), takeGemList.length, returnGemList.length);
   if (player.bank.gemCount() + takeGemList.length - returnGemList.length > 10)
     throw new Error(
-      `Ccannot hold more than 10 gems: ${
+      `Cannot hold more than 10 gems: ${
         player.id
       } already has ${player.bank.gemCount()} gems and cannot take ${
         takeGemList.length

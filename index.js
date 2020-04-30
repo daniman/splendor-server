@@ -13,6 +13,22 @@ const Game = require('./models/Game');
  */
 
 let games = [];
+// Starter state helper:
+// let games = [new Game('The Game')];
+// games[0].addPlayer('dani');
+// games[0].addPlayer('dani2');
+// games[0].addPlayer('dani3');
+// games[0].addPlayer('dani4');
+// games[0].startGame();
+// games[0].takeTurn('dani', {
+//   takeGems: ['WHITE', 'BLUE', 'GREEN'],
+// });
+// games[0].takeTurn('dani', {
+//   takeGems: ['WHITE', 'BLUE', 'GREEN'],
+// });
+// games[0].takeTurn('dani', {
+//   takeGems: ['WHITE', 'BLUE', 'GREEN'],
+// });
 
 const resolvers = {
   Query: {

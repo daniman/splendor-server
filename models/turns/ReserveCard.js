@@ -1,15 +1,26 @@
-module.exports = (cardStacks, bank, player, cardId) => {
+module.exports = (cardStacks, bank, player, cardId, returnGems = []) => {
   let found = false;
   cardStacks.forEach(({ cards }) => {
     if (cards.showing(cardId)) {
       try {
-        const card = cards.takeCard(cardId);
-        player.reserveCard(card);
-
         if (bank.YELLOW > 0) {
+          if (player.bank.gemCount() - returnGems.length >= 10) {
+            throw new Error(
+              `Cannot take a YELLOW gem because ${player.id} already has 10 gems. Please return a gem along with the reserve.`
+            );
+          }
+
+          returnGems.forEach((gemColor) => {
+            player.returnGem(gemColor, 1);
+          });
+
+          // otherwise... grant a yellow gem
           bank.subtract('YELLOW', 1);
           player.takeGem('YELLOW', 1);
         }
+
+        const card = cards.takeCard(cardId);
+        player.reserveCard(card);
 
         found = true;
       } catch (e) {

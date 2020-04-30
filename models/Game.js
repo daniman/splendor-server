@@ -120,7 +120,13 @@ class Game {
       context.type = 'TAKE_GEMS';
       context.gems = takeGems;
     } else if (!!reserveCardById) {
-      reserveCardTurn(this.cardStacks, this.bank, player, reserveCardById);
+      reserveCardTurn(
+        this.cardStacks,
+        this.bank,
+        player,
+        reserveCardById,
+        returnGems
+      );
 
       context.type = 'RESERVE_CARD';
       context.id = reserveCardById;
