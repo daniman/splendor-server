@@ -1,30 +1,33 @@
 module.exports = `
   type TakeGems implements Turn {
+    when: String!
     playerId: ID!
     type: TurnType!
     gems: [GemColor!]!
   }
 
   type ReserveCard implements Turn {
+    when: String!
     playerId: ID!
     type: TurnType!
     id: ID!
   }
 
   type PurchaseCard implements Turn {
+    when: String!
     playerId: ID!
     type: TurnType!
     id: ID!
   }
 
   interface Turn {
+    when: String!
     playerId: ID!
     type: TurnType!
   }
 
   enum TurnType {
-    TAKE_TWO_GEMS
-    TAKE_THREE_GEMS
+    TAKE_GEMS
     RESERVE_CARD
     PURCHASE_CARD
   }
@@ -74,6 +77,7 @@ module.exports = `
     # Ordering: 1st place, 2nd place, etc.
     players: [Player!]!
     player(id: ID!): Player
+    currentTurn: Player
     state: GameState!
     name: String!
     bank: [CostUnit!]!

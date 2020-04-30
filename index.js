@@ -4,21 +4,22 @@ const Game = require('./models/Game');
 
 /**
  * Game logic:
- * - Implement turn switching and the enforcement of turn ordering.
- * - Implement turns where game is not complete until the last player has gone in a single turn round.
  * - Implement "max 10 coins" logic.
  * - Implement a "returnGems" aspect of the take coins mutation as a result.
  * - Build a "reserve from top of the deck" pathway.
- * - Look for TODOs.
  *
  * Implementation details:
- * - Implement "instantiate game on demand" and hold multiple games at once.
  * - Consider switching from in-memory to using a DB.
- * - Have games clean themselves up when finished to save memory?
+ * - Have games clean themselves up when finished to save memory? Provide a way to delete games?
  * - Figure out how to turn this whole thing into TS with hot module reloading?
  */
 
-let games = [];
+let games = [new Game('The Game')];
+games[0].addPlayer('dani');
+games[0].addPlayer('dani2');
+games[0].addPlayer('dani3');
+games[0].addPlayer('dani4');
+games[0].startGame();
 
 const resolvers = {
   Query: {
@@ -118,6 +119,7 @@ const server = new ApolloServer({
     schemaTag: 'local',
     apiKey: 'service:splendor:SaDSZzGf0avhRcSqD8z_Mg',
   },
+  playground: true,
 });
 
 server

@@ -20,9 +20,11 @@ class Game {
     this.name = name;
 
     this.state = 'LOBBY';
+
     this.players = [];
-    this.playerRankings = [];
     this.winner = null;
+
+    this.currentTurn = null;
 
     this.bank = new Bank();
 
@@ -74,13 +76,20 @@ class Game {
 
     const bank = bankStart[`${this.players.length}`];
 
+    this.currentTurn = this.players[
+      Math.floor(Math.random() * this.players.length)
+    ];
+
     // initialize the bank
     Object.keys(bank).forEach((gemColor) => {
       this.bank.add(gemColor, bank[gemColor]);
     });
   }
 
-  checkIfWon() {}
+  advanceTurn(playerId) {
+    const i = this.players.findIndex((p) => p.id === playerId);
+    this.currentTurn = this.players[(i + 1) % this.players.length];
+  }
 
   takeTurn(playerId, turnContext) {
     if (this.state === 'LOBBY')
@@ -88,6 +97,11 @@ class Game {
 
     if (this.state === 'COMPLETE')
       throw new Error('This game is complete! No more turns can be taken.');
+
+    if (playerId !== this.currentTurn.id)
+      throw new Error(
+        `Sorry ${player}, it's not your turn... it's ${this.currentTurn.id}'s turn.`
+      );
 
     if (Object.keys(turnContext).length > 1)
       throw new Error('Cannot provide context for more than one turn at once.');
@@ -104,38 +118,39 @@ class Game {
       purchaseCardById,
     } = turnContext;
 
+    const context = {};
+
     if (!!takeGems) {
       takeGemsTurn(this.bank, player, takeGems);
 
-      this.turns.push({
-        playerId,
-        type: 'TAKE_GEMS',
-        gems: takeGems,
-      });
+      context.type = 'TAKE_GEMS';
+      context.gems = takeGems;
     } else if (!!reserveCardById) {
       reserveCardTurn(this.cardStacks, this.bank, player, reserveCardById);
 
-      this.turns.push({
-        playerId,
-        type: 'RESERVE_CARD',
-        id: reserveCardById,
-      });
+      context.type = 'RESERVE_CARD';
+      context.id = reserveCardById;
     } else if (!!purchaseCardById) {
       purchaseCardTurn(this.cardStacks, this.bank, player, purchaseCardById);
       player.checkForNobles(this.nobles);
 
-      this.turns.push({
-        playerId,
-        type: 'PURCHASE_CARD',
-        id: purchaseCardById,
-      });
+      context.type = 'PURCHASE_CARD';
+      context.id = purchaseCardById;
     } else {
       throw new Error('Cannot execute a turn when no context was provided.');
     }
 
+    this.advanceTurn(playerId);
+    this.turns.push({
+      when: new Date().toISOString(),
+      playerId,
+      ...context,
+    });
+
     // check for a winner
     this.players.forEach((p) => {
-      if (p.score >= 15) this.state = 'COMPLETE';
+      if (p.score >= 15 && this.turns.length % this.players.length === 0)
+        this.state = 'COMPLETE';
     });
   }
 }
