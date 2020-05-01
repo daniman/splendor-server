@@ -13,7 +13,6 @@ module.exports = (bank, player, takeGemList = [], returnGemList = []) => {
       'Cannot select two gems of the same color when selecting more than 2 gems.'
     );
 
-  console.log(player.bank.gemCount(), takeGemList.length, returnGemList.length);
   if (player.bank.gemCount() + takeGemList.length - returnGemList.length > 10)
     throw new Error(
       `Cannot hold more than 10 gems: ${
@@ -22,8 +21,6 @@ module.exports = (bank, player, takeGemList = [], returnGemList = []) => {
         takeGemList.length
       } more. Try returning more gems.`
     );
-
-  console.log(player.bank.gemCount());
 
   if (
     takeGemList.length === 2 &&
@@ -44,6 +41,7 @@ module.exports = (bank, player, takeGemList = [], returnGemList = []) => {
     });
     returnGemList.forEach((gemColor) => {
       player.returnGem(gemColor, 1);
+      bank.add(gemColor, 1);
     });
   } catch (e) {
     throw new Error(e.message);
