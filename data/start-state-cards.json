@@ -583,14 +583,14 @@
       "id": "-5-3---2"
     },
     {
-      "WHITE": 0,
+      "WHITE": 3,
       "BLUE": 0,
       "GREEN": 0,
       "RED": 0,
       "BLACK": 5,
       "pointValue": 2,
       "gemColor": "RED",
-      "id": "----5-2"
+      "id": "3----5-2"
     },
     {
       "WHITE": 0,
