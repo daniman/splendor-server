@@ -23,6 +23,11 @@ class Stack {
     return this.visible[cardPos];
   }
 
+  takeCardFromTop() {
+    const card = this.hidden.pop();
+    return card;
+  }
+
   takeCard(cardId) {
     const cardPos = this.visible.findIndex((obj) => obj.id === cardId);
 

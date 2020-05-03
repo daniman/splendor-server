@@ -1,4 +1,5 @@
 module.exports = (cardStacks, bank, player, cardId, returnGems = []) => {
+  let card = null;
   let found = false;
   cardStacks.forEach(({ cards }) => {
     if (cards.showing(cardId)) {
@@ -19,8 +20,8 @@ module.exports = (cardStacks, bank, player, cardId, returnGems = []) => {
           player.takeGem('YELLOW', 1);
         }
 
-        const card = cards.takeCard(cardId);
-        player.reserveCard(card);
+        card = cards.takeCard(cardId);
+        player.reserveCard(card, false);
 
         found = true;
       } catch (e) {
@@ -30,4 +31,5 @@ module.exports = (cardStacks, bank, player, cardId, returnGems = []) => {
   });
 
   if (!found) throw new Error(`Card ${cardId} is not available to reserve.`);
+  return card;
 };

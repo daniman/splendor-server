@@ -8,6 +8,7 @@ const Stack = require('./Stack');
 const takeGemsTurn = require('./turns/TakeGems');
 const purchaseCardTurn = require('./turns/PurchaseCard');
 const reserveCardTurn = require('./turns/ReserveCard');
+const reserveCardFromStackTurn = require('./turns/ReserveCardFromStack');
 
 const alphabet = 'abcdefghijklmnopqrstuvwxyz';
 
@@ -79,6 +80,7 @@ class Game {
     this.currentTurn = this.players[
       Math.floor(Math.random() * this.players.length)
     ];
+    // this.currentTurn = this.players[0];
 
     // initialize the bank
     Object.keys(bank).forEach((gemColor) => {
@@ -111,7 +113,12 @@ class Game {
     if (Object.keys(restOfTheContext).length > 1)
       throw new Error('Cannot provide context for more than one turn at once.');
 
-    const { takeGems, reserveCardById, purchaseCardById } = restOfTheContext;
+    const {
+      takeGems,
+      purchaseCardById,
+      reserveCardById,
+      reserveCardFromStack,
+    } = restOfTheContext;
 
     const context = {};
     if (!!takeGems) {
@@ -120,7 +127,7 @@ class Game {
       context.type = 'TAKE_GEMS';
       context.gems = takeGems;
     } else if (!!reserveCardById) {
-      reserveCardTurn(
+      const card = reserveCardTurn(
         this.cardStacks,
         this.bank,
         player,
@@ -129,13 +136,28 @@ class Game {
       );
 
       context.type = 'RESERVE_CARD';
-      context.id = reserveCardById;
+      context.card = card;
+    } else if (!!reserveCardFromStack) {
+      const card = reserveCardFromStackTurn(
+        this.cardStacks.find((s) => s.type === reserveCardFromStack),
+        this.bank,
+        player,
+        returnGems
+      );
+
+      context.type = 'RESERVE_CARD';
+      context.cardType = reserveCardFromStack;
     } else if (!!purchaseCardById) {
-      purchaseCardTurn(this.cardStacks, this.bank, player, purchaseCardById);
+      const card = purchaseCardTurn(
+        this.cardStacks,
+        this.bank,
+        player,
+        purchaseCardById
+      );
       player.checkForNobles(this.nobles);
 
       context.type = 'PURCHASE_CARD';
-      context.id = purchaseCardById;
+      context.card = card;
     } else {
       throw new Error('Cannot execute a turn when no context was provided.');
     }

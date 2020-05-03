@@ -23,11 +23,17 @@ let games = [];
 // games[0].takeTurn('dani', {
 //   takeGems: ['WHITE', 'BLUE', 'GREEN'],
 // });
-// games[0].takeTurn('dani', {
+// games[0].takeTurn('dani2', {
 //   takeGems: ['WHITE', 'BLUE', 'GREEN'],
 // });
-// games[0].takeTurn('dani', {
+// games[0].takeTurn('dani3', {
 //   takeGems: ['WHITE', 'BLUE', 'GREEN'],
+// });
+// games[0].takeTurn('dani4', {
+//   reserveCardById: games[0].cardStacks[0].cards.visible[3].id,
+// });
+// games[0].takeTurn('dani', {
+//   reserveCardFromStack: 'I',
 // });
 
 const resolvers = {
@@ -50,6 +56,18 @@ const resolvers = {
       if (!player)
         throw new ApolloError(`Could not find player with ID: ${args.id}`);
       return player;
+    },
+    players: (game, args) => {
+      return game.players.map((p) => ({
+        ...p,
+        reservedCards: p.reservedCards.map((rc) =>
+          !rc.isPrivate ||
+          p.id === args.currentPlayer ||
+          args.currentPlayer === 'sudo'
+            ? { card: rc.card }
+            : { card: null }
+        ),
+      }));
     },
     nobles: (game) => game.nobles.visible,
     cardStacks: (game, args) =>
@@ -76,11 +94,11 @@ const resolvers = {
   },
   Player: {
     bank: (player) => player.bank.state(),
+    reservedCards: (player) => player.reservedCards.map(({ card }) => card),
   },
   Mutation: {
     game: (_parent, args) => {
       const game = games.find((g) => `${g.id}` === args.id);
-      // const game = Object.keys(games).find((gameId) => `${gameId}` === args.id);
       if (!game)
         throw new ApolloError(`Could not find game with ID: ${args.gameId}`);
 

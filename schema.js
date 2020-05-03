@@ -10,14 +10,15 @@ module.exports = `
     when: String!
     playerId: ID!
     type: TurnType!
-    id: ID!
+    cardType: CardStackType
+    card: Card
   }
 
   type PurchaseCard implements Turn {
     when: String!
     playerId: ID!
     type: TurnType!
-    id: ID!
+    card: Card
   }
 
   interface Turn {
@@ -73,9 +74,7 @@ module.exports = `
 
   type Game {
     id: ID!
-    # The players in the game; returned in order of ranking.
-    # Ordering: 1st place, 2nd place, etc.
-    players: [Player!]!
+    players(currentPlayer: ID): [Player!]!
     player(id: ID!): Player
     currentTurn: Player
     state: GameState!
@@ -89,7 +88,7 @@ module.exports = `
   type Player {
     id: ID!
     bank: [CostUnit!]!
-    reservedCards: [Card!]!
+    reservedCards: [Card]!
     purchasedCards: [Card!]!
     nobles: [Card!]!
     score: Int!
@@ -112,8 +111,9 @@ module.exports = `
       playerId: ID!
       takeGems: [GemColor!]
       returnGems: [GemColor!]
-      reserveCardById: ID
       purchaseCardById: ID
+      reserveCardById: ID
+      reserveCardFromStack: CardStackType
     ): Game
   }
 `;
