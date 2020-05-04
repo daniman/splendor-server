@@ -22,7 +22,7 @@ module.exports = (cardStacks, bank, player, cardId) => {
 
   if (player.reservedCards.map(({ card }) => card.id).includes(cardId)) {
     try {
-      card = player.reservedCards.find(({ card }) => card.id === cardId);
+      card = player.reservedCards.find(({ card }) => card.id === cardId).card;
       const paidGems = player.purchaseCard(card);
 
       paidGems.forEach(({ gemColor, quantity }) => {
