@@ -583,14 +583,14 @@
       "id": "-5-3---2"
     },
     {
-      "WHITE": 3,
+      "WHITE": 0,
       "BLUE": 0,
       "GREEN": 0,
       "RED": 0,
       "BLACK": 5,
       "pointValue": 2,
       "gemColor": "RED",
-      "id": "3----5-2"
+      "id": "----5-2R"
     },
     {
       "WHITE": 0,
@@ -650,7 +650,7 @@
       "BLACK": 5,
       "pointValue": 2,
       "gemColor": "BLACK",
-      "id": "----5-2"
+      "id": "----5-2B"
     },
     {
       "WHITE": 0,
