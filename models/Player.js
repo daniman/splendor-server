@@ -1,13 +1,23 @@
 const Bank = require('./Bank');
+const Card = require('./Card');
 
 class Player {
-  constructor(id) {
+  constructor(id, backup) {
     this.id = id;
-    this.bank = new Bank();
-    this.reservedCards = [];
-    this.purchasedCards = [];
-    this.nobles = [];
-    this.score = 0;
+    if (!backup) {
+      this.bank = new Bank();
+      this.reservedCards = [];
+      this.purchasedCards = [];
+      this.nobles = [];
+      this.score = 0;
+    } else {
+      this.bank = new Bank(backup.bank);
+
+      this.reservedCards = backup.reservedCards.map((card) => new Card(card));
+      this.purchasedCards = backup.purchasedCards.map((card) => new Card(card));
+      this.nobles = backup.nobles.map((card) => new Card(card));
+      this.score = backup.score;
+    }
   }
 
   takeGem(gemColor, quantity) {

@@ -1,11 +1,22 @@
 class Bank {
-  constructor() {
-    this.RED = 0;
-    this.BLUE = 0;
-    this.GREEN = 0;
-    this.BLACK = 0;
-    this.WHITE = 0;
-    this.YELLOW = 0;
+  constructor(backup) {
+    if (!backup) {
+      this.RED = 0;
+      this.BLUE = 0;
+      this.GREEN = 0;
+      this.BLACK = 0;
+      this.WHITE = 0;
+      this.YELLOW = 0;
+
+      // Restore a game from redis
+    } else {
+      this.RED = backup.RED;
+      this.BLUE = backup.BLUE;
+      this.GREEN = backup.GREEN;
+      this.BLACK = backup.BLACK;
+      this.WHITE = backup.WHITE;
+      this.YELLOW = backup.YELLOW;
+    }
   }
 
   add(color, quantity) {
