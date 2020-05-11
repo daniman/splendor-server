@@ -2,7 +2,8 @@ const { ApolloServer, ApolloError } = require('apollo-server');
 const typeDefs = require('./schema');
 const Game = require('./models/Game');
 const redis = require('redis');
-const redisClient = redis.createClient();
+
+const redisClient = process.env.REDIS_URL ? redis.createClient(process.env.REDIS_URL) : redis.createClient();
 
 /**
  * Game logic:
