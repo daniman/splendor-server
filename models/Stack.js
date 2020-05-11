@@ -2,12 +2,21 @@ const Card = require('./Card');
 const shuffle = require('../helpers/shuffle');
 
 class Stack {
-  constructor(cardArray, numShowing, dontReplace = false) {
-    const stack = shuffle(cardArray.slice()).map((card) => new Card(card));
+  constructor(cardArray, numShowing, dontReplace = false, backup) {
 
-    this.visible = stack.slice(0, numShowing);
-    this.hidden = stack.slice(numShowing);
-    this.dontReplace = dontReplace;
+    if (!backup) {
+      const stack = shuffle(cardArray.slice()).map((card) => new Card(card));
+
+      this.visible = stack.slice(0, numShowing);
+      this.hidden = stack.slice(numShowing);
+      this.dontReplace = dontReplace;
+
+      // Restore a game from redis
+    } else {
+      this.visible = backup.visible.map((card) => new Card(card));
+      this.hidden = backup.hidden.map((card) => new Card(card));
+      this.dontReplace = backup.dontReplace;
+    }
   }
 
   cards() {

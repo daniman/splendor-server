@@ -13,40 +13,83 @@ const reserveCardFromStackTurn = require('./turns/ReserveCardFromStack');
 const alphabet = 'abcdefghijklmnopqrstuvwxyz';
 
 class Game {
-  constructor(name) {
-    this.id = new Array(4)
-      .fill(0)
-      .map(() => alphabet[Math.floor(Math.random() * 26)])
-      .join('');
-    this.name = name;
+  constructor(name, backup) {
+    if (!backup) {
+      this.id = new Array(4)
+        .fill(0)
+        .map(() => alphabet[Math.floor(Math.random() * 26)])
+        .join('');
+      this.name = name;
 
-    this.state = 'LOBBY';
+      this.state = 'LOBBY';
 
-    this.players = [];
-    this.winner = null;
+      this.players = [];
+      this.winner = null;
 
-    this.currentTurn = null;
+      // Don't set nobles until game start, because the number of nobles
+      // depends on the number of players.
+      this.nobles = null;
 
-    this.bank = new Bank();
+      this.currentTurn = null;
 
-    this.nobles = new Stack(cardStart.Noble, 5, true);
+      this.bank = new Bank();
 
-    this.cardStacks = [
-      {
-        type: 'III',
-        cards: new Stack(cardStart.III, 4),
-      },
-      {
-        type: 'II',
-        cards: new Stack(cardStart.II, 4),
-      },
-      {
-        type: 'I',
-        cards: new Stack(cardStart.I, 4),
-      },
-    ];
+      this.cardStacks = [
+        {
+          type: 'III',
+          cards: new Stack(cardStart.III, 4),
+        },
+        {
+          type: 'II',
+          cards: new Stack(cardStart.II, 4),
+        },
+        {
+          type: 'I',
+          cards: new Stack(cardStart.I, 4),
+        },
+      ];
 
-    this.turns = [];
+      this.turns = [];
+
+      // Restore a game from redis
+    } else {
+      this.id = backup.id;
+      this.name = backup.name;
+      this.state = backup.state;
+      this.winner = backup.winner;
+      this.bank = new Bank(backup.bank);
+      this.cardStacks = [
+        {
+          type: 'III',
+          cards: new Stack(null, null, null, backup.cardStacks[0].cards)
+        },
+        {
+          type: 'II',
+          cards: new Stack(null, null, null, backup.cardStacks[1].cards)
+        },
+        {
+          type: 'III',
+          cards: new Stack(null, null, null, backup.cardStacks[2].cards)
+        }
+      ];
+
+      this.players = [];
+      for (var playerBackup of backup.players) {
+        this.players.push(new Player(playerBackup.id, playerBackup));
+      }
+
+      if (backup.currentTurn) {
+        this.currentTurn = this.players.find(player => player.id === backup.currentTurn.id);
+      } else {
+        this.currentTurn = null;
+      }
+
+      if (backup.nobles) {
+        this.nobles = new Stack(null, null, null, backup.nobles);
+      }
+
+      this.turns = backup.turns;
+    }
   }
 
   addPlayer(id) {
@@ -72,6 +115,8 @@ class Game {
 
     if (this.state !== 'LOBBY')
       throw new Error('Cannot start a game already in progress or completed.');
+
+    this.nobles = new Stack(cardStart.Noble, this.players.length + 1, true);
 
     this.state = 'ACTIVE';
 

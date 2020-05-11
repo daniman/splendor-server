@@ -1,6 +1,8 @@
 const { ApolloServer, ApolloError } = require('apollo-server');
 const typeDefs = require('./schema');
 const Game = require('./models/Game');
+const redis = require('redis');
+const redisClient = redis.createClient();
 
 /**
  * Game logic:
@@ -13,6 +15,20 @@ const Game = require('./models/Game');
  */
 
 let games = [];
+
+// When the server starts up, pull all the games that are currently
+// persisted in redis.
+redisClient.scan(0, 'MATCH', 'game:*', function(err, reply) {
+  const storedGameIds = reply[1];
+  for (var gameId of storedGameIds) {
+    redisClient.get(gameId, function(error, game) {
+      if(!error && game) {
+        games.push(new Game(null, JSON.parse(game)));
+      }
+    })
+  }
+});
+
 // Starter state helper:
 // let games = [new Game('The Game')];
 // games[0].addPlayer('dani');
@@ -35,6 +51,13 @@ let games = [];
 // games[0].takeTurn('dani', {
 //   reserveCardFromStack: 'I',
 // });
+
+function updateRedis(game) {
+  redisClient.set('game:' + game.id, JSON.stringify(game));
+
+  // Store the game in redis for up to two hours past the last action taken.
+  redisClient.expire('game:' + game.id, 7200);
+}
 
 const resolvers = {
   Query: {
@@ -107,6 +130,7 @@ const resolvers = {
     newGame: (_parent, args) => {
       const game = new Game(args.name);
       games.push(game);
+      updateRedis(game);
       return game;
     },
   },
@@ -114,6 +138,7 @@ const resolvers = {
     start: (game) => {
       try {
         game.startGame();
+        updateRedis(game);
         return game;
       } catch (e) {
         throw new ApolloError(e.message);
@@ -122,6 +147,7 @@ const resolvers = {
     join: (game, args) => {
       try {
         game.addPlayer(args.playerId);
+        updateRedis(game);
         return game;
       } catch (e) {
         throw new ApolloError(e.message);
@@ -131,6 +157,7 @@ const resolvers = {
       const { playerId, ...context } = args;
       try {
         game.takeTurn(playerId, context);
+        updateRedis(game);
         return game;
       } catch (e) {
         throw new ApolloError(e.message);
