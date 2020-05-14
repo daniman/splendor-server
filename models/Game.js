@@ -10,6 +10,8 @@ const purchaseCardTurn = require('./turns/PurchaseCard');
 const reserveCardTurn = require('./turns/ReserveCard');
 const reserveCardFromStackTurn = require('./turns/ReserveCardFromStack');
 
+const shuffle = require('../helpers/shuffle');
+
 const alphabet = 'abcdefghijklmnopqrstuvwxyz';
 
 class Game {
@@ -122,10 +124,8 @@ class Game {
 
     const bank = bankStart[`${this.players.length}`];
 
-    this.currentTurn = this.players[
-      Math.floor(Math.random() * this.players.length)
-    ];
-    // this.currentTurn = this.players[0];
+    this.players = shuffle(this.players);
+    this.currentTurn = this.players[0];
 
     // initialize the bank
     Object.keys(bank).forEach((gemColor) => {
