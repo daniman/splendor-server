@@ -5,7 +5,7 @@ module.exports = ({ cards }, bank, player, returnGems = []) => {
     if (bank.YELLOW > 0) {
       if (player.bank.gemCount() - returnGems.length >= 10) {
         throw new Error(
-          `Cannot take a YELLOW gem because ${player.id} already has 10 gems. Please return a gem along with the reserve.`
+          `You already have 10 chips. Trade in one chip along with your reserve.`
         );
       }
 

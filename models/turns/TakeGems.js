@@ -1,25 +1,21 @@
 module.exports = (bank, player, takeGemList = [], returnGemList = []) => {
   if (takeGemList.includes('YELLOW'))
-    throw new Error('Cannot select YELLOW gems directly from the bank.');
+    throw new Error('You can only take a gold chip when reserving a card.');
 
   if (takeGemList.length > 3)
-    throw new Error('Can only select 3 gems or less.');
+    throw new Error('You can only take up to three chips in a turn.');
 
   if (
     takeGemList.length > 2 &&
     new Set(takeGemList).size !== takeGemList.length
   )
     throw new Error(
-      'Cannot select two gems of the same color when selecting more than 2 gems.'
+      'When you take three chips, each must be a different color.'
     );
 
   if (player.bank.gemCount() + takeGemList.length - returnGemList.length > 10)
     throw new Error(
-      `Cannot hold more than 10 gems: ${
-        player.id
-      } already has ${player.bank.gemCount()} gems and cannot take ${
-        takeGemList.length
-      } more. Try returning more gems.`
+      `To take this many chips, you must return at least ${player.bank.gemCount() + takeGemList.length - 10} chip(s).`
     );
 
   if (
@@ -28,9 +24,7 @@ module.exports = (bank, player, takeGemList = [], returnGemList = []) => {
     bank[takeGemList[0]] < 4
   ) {
     throw new Error(
-      `Cannot take 2 gems from the ${
-        takeGemList[0]
-      } stack when there are only ${bank[takeGemList[0]]} available.`
+      `You cannot take 2 chips of the same color from a stack with fewer than 4 chips.`
     );
   }
 
