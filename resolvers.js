@@ -121,7 +121,7 @@ const resolvers = {
   },
   Subscription: {
     allGamesPub: { // the list of games (for the home page)
-      subscribe: (_parent, args, _context, _info) => pubsub.asyncIterator('allGamesPub')
+      subscribe: () => pubsub.asyncIterator('allGamesPub')
     },
     gameMutation: { // the game state for a particular game
       subscribe: withFilter (
