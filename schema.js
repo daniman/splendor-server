@@ -116,4 +116,9 @@ module.exports = `
       reserveCardFromStack: CardStackType
     ): Game
   }
+
+  type Subscription {
+    allGamesPub: Game!
+    gameMutation(id: ID!): Game!
+  } 
 `;
