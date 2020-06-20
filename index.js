@@ -3,7 +3,9 @@ const typeDefs = require('./schema');
 const Game = require('./models/Game');
 const redis = require('redis');
 
-const redisClient = process.env.REDIS_URL ? redis.createClient(process.env.REDIS_URL) : redis.createClient();
+const redisClient = process.env.REDIS_URL
+  ? redis.createClient(process.env.REDIS_URL)
+  : redis.createClient();
 
 /**
  * Game logic:
@@ -19,14 +21,14 @@ let games = [];
 
 // When the server starts up, pull all the games that are currently
 // persisted in redis.
-redisClient.scan(0, 'MATCH', 'game:*', function(err, reply) {
+redisClient.scan(0, 'MATCH', 'game:*', function (err, reply) {
   const storedGameIds = reply[1];
   for (var gameId of storedGameIds) {
-    redisClient.get(gameId, function(error, game) {
-      if(!error && game) {
+    redisClient.get(gameId, function (error, game) {
+      if (!error && game) {
         games.push(new Game(null, JSON.parse(game)));
       }
-    })
+    });
   }
 });
 
@@ -171,8 +173,13 @@ const server = new ApolloServer({
   typeDefs,
   resolvers,
   engine: {
-    schemaTag: 'local',
-    apiKey: 'service:splendor:SaDSZzGf0avhRcSqD8z_Mg',
+    graphVariant: process.env.NODE_ENV || 'local',
+    reportSchema: true,
+
+    // URLs for reporting to Studio staging instead of Studio prod.
+    // tracesEndpointUrl: 'https://engine-staging-report.apollodata.com',
+    // schemaReportingUrl:
+    // 'https://engine-staging-graphql.apollographql.com/api/graphql',
   },
   playground: true,
 });
