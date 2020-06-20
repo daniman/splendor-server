@@ -176,7 +176,7 @@ const server = new ApolloServer({
     graphVariant: process.env.NODE_ENV || 'local',
     reportSchema: true,
     sendHeaders: true,
-    sendVariableValues: true,
+    // sendVariableValues: true,
 
     // URLs for reporting to Studio staging instead of Studio prod.
     // tracesEndpointUrl: 'https://engine-staging-report.apollodata.com',
