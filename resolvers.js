@@ -1,7 +1,9 @@
 const { ApolloError, withFilter } = require('apollo-server');
 const Game = require('./models/Game');
+const Bank = require('./models/Bank');
 const pubsub = require('./helpers/pubsub');
 const { loadGames, persist } = require('./helpers/persist');
+const Card = require('./models/Card');
 
 /**
  * Game logic:
@@ -23,14 +25,20 @@ const resolvers = {
     allGames: () => games,
   },
   Card: {
-    cost: (card) => card.cost(),
+    cost: (card) => {
+      if (!(card instanceof Card)) card = new Card(card);
+      return card.cost();
+    },
   },
   CardStack: {
     remaining: (stack) => stack.cards.hidden.length,
     cards: (stack) => stack.cards.visible,
   },
   Game: {
-    bank: (game) => game.bank.state(),
+    bank: (game) => {
+      if (!(game.bank instanceof Bank)) game.bank = new Bank(game.bank);
+      return game.bank.state();
+    },
     player: (game, args) => {
       const player = game.players.find((p) => p.id === args.id);
       if (!player)
@@ -74,7 +82,11 @@ const resolvers = {
     },
   },
   Player: {
-    bank: (player) => player.bank.state(),
+    // TBD: when hit with a subscription the state() function ends up being undefined
+    bank: (player) => {
+      if (!(player.bank instanceof Bank)) player.bank = new Bank(player.bank);
+      return player.bank.state();
+    },
     reservedCards: (player) => player.reservedCards.map(({ card }) => card),
   },
   Mutation: {
@@ -113,7 +125,7 @@ const resolvers = {
       const { playerId, ...context } = args;
       try {
         game.takeTurn(playerId, context);
-        persist(game,update);
+        persist(game,'update');
         return game;
       } catch (e) {
         throw new ApolloError(e.message);
