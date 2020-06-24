@@ -10,9 +10,9 @@ class Player {
       this.purchasedCards = [];
       this.nobles = [];
       this.score = 0;
+      
     } else {
       this.bank = new Bank(backup.bank);
-
       this.reservedCards = backup.reservedCards.map((card) => new Card(card));
       this.purchasedCards = backup.purchasedCards.map((card) => new Card(card));
       this.nobles = backup.nobles.map((card) => new Card(card));
