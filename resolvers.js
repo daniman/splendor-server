@@ -14,9 +14,15 @@ const Card = require('./models/Card');
  * - Have games clean themselves up when finished to save memory? Provide a way to delete games?
  * - Figure out how to turn this whole thing into TS with hot module reloading?
  */
+const purgeGames = require('./helpers/purgeGames');
 
 // load games into memory at startup
-const games = loadGames();
+let games = loadGames();
+
+// purge stale games every 10 minutes
+setInterval(() => {
+  games = purgeGames(games);
+},10*60*1000);
 
 const resolvers = {
   Query: {

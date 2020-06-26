@@ -22,7 +22,7 @@ class Game {
         .map(() => alphabet[Math.floor(Math.random() * 26)])
         .join('');
       this.name = name;
-
+      this.createdAt = new Date();
       this.state = 'LOBBY';
 
       this.players = [];
@@ -50,13 +50,12 @@ class Game {
           cards: new Stack(cardStart.I, 4),
         },
       ];
-
       this.turns = [];
 
-      // Restore a game from redis
-    } else {
+    } else { // Restore a game from redis
       this.id = backup.id;
       this.name = backup.name;
+      this.createdAt = new Date(backup.createdAt);
       this.state = backup.state;
       this.winner = backup.winner;
       this.bank = new Bank(backup.bank);

@@ -79,6 +79,7 @@ module.exports = `
     currentTurn: Player
     state: GameState!
     name: String!
+    createdAt: String!
     bank: [CostUnit!]!
     turns: [Turn!]!
     nobles: [Card!]!
