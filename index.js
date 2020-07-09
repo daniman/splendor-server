@@ -87,6 +87,7 @@ const resolvers = {
       return game.players.map((p) => ({
         ...p,
         reservedCards: p.reservedCards.map((rc) =>
+          game.state === 'COMPLETE' ||
           !rc.isPrivate ||
           p.id === args.currentPlayer ||
           args.currentPlayer === 'sudo'
