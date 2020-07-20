@@ -83,6 +83,7 @@ module.exports = `
     turns: [Turn!]!
     nobles: [Card!]!
     cardStacks(type: CardStackType): [CardStack!]!
+    winner: Player
   }
 
   type Player {

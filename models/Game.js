@@ -63,16 +63,16 @@ class Game {
       this.cardStacks = [
         {
           type: 'III',
-          cards: new Stack(null, null, null, backup.cardStacks[0].cards)
+          cards: new Stack(null, null, null, backup.cardStacks[0].cards),
         },
         {
           type: 'II',
-          cards: new Stack(null, null, null, backup.cardStacks[1].cards)
+          cards: new Stack(null, null, null, backup.cardStacks[1].cards),
         },
         {
           type: 'III',
-          cards: new Stack(null, null, null, backup.cardStacks[2].cards)
-        }
+          cards: new Stack(null, null, null, backup.cardStacks[2].cards),
+        },
       ];
 
       this.players = [];
@@ -81,7 +81,9 @@ class Game {
       }
 
       if (backup.currentTurn) {
-        this.currentTurn = this.players.find(player => player.id === backup.currentTurn.id);
+        this.currentTurn = this.players.find(
+          (player) => player.id === backup.currentTurn.id
+        );
       } else {
         this.currentTurn = null;
       }
@@ -218,6 +220,7 @@ class Game {
     this.players.forEach((p) => {
       if (p.score >= 15 && this.turns.length % this.players.length === 0)
         this.state = 'COMPLETE';
+      this.winner = p;
     });
   }
 }
