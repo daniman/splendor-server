@@ -79,6 +79,7 @@ module.exports = `
     currentTurn: Player
     state: GameState!
     name: String!
+    createdAt: String!
     bank: [CostUnit!]!
     turns: [Turn!]!
     nobles: [Card!]!
@@ -117,4 +118,9 @@ module.exports = `
       reserveCardFromStack: CardStackType
     ): Game
   }
+
+  type Subscription {
+    allGamesPub: Game!
+    gameMutation(id: ID!): Game!
+  } 
 `;
