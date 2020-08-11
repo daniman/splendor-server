@@ -1,9 +1,17 @@
 module.exports = (cardStacks, bank, player, cardId, returnGems = []) => {
   let card = null;
   let found = false;
+
   cardStacks.forEach(({ cards }) => {
     if (cards.showing(cardId)) {
       try {
+
+        if (player.reservedCards.length >= 3) {
+          throw new Error(
+            `You already have 3 cards reserved.`
+          );
+        }
+
         if (bank.YELLOW > 0) {
           if (player.bank.gemCount() - returnGems.length >= 10) {
             throw new Error(
@@ -13,6 +21,7 @@ module.exports = (cardStacks, bank, player, cardId, returnGems = []) => {
 
           returnGems.forEach((gemColor) => {
             player.returnGem(gemColor, 1);
+            bank.add(gemColor, 1);
           });
 
           // otherwise... grant a yellow gem

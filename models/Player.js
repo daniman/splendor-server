@@ -29,11 +29,6 @@ class Player {
   }
 
   reserveCard(card, isPrivate) {
-    if (this.reservedCards.length >= 3)
-      throw new Error(
-        'Cannot reserve card because you already have 3 reserved.'
-      );
-
     this.reservedCards.push({ isPrivate, card });
   }
 
