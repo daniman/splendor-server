@@ -20,6 +20,8 @@
     "mime-db": "^1.44.0",
     "mime-types": "^2.1.27",
     "moment": "^2.26.0",
-    "redis": "^3.0.2"
-  }
+    "redis": "^3.0.2",
+    "uuid": "^8.3.0"
+  },
+  "devDependencies": {}
 }
