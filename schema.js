@@ -85,7 +85,7 @@ module.exports = `
     nobles: [Card!]!
     cardStacks(type: CardStackType): [CardStack!]!
     winner: Player
-    messages: [Message]!
+    messages: [Message!]!
   }
 
   type Player {
@@ -99,7 +99,7 @@ module.exports = `
 
   type Message {
     when: String!
-    player(id: ID!): Player
+    playerId: ID!
     text: String!
   }
 
@@ -127,7 +127,7 @@ module.exports = `
     newMessage(
       playerId: ID!
       text: String!
-    ): Game
+    ): Message
   }
 
   type Subscription {
