@@ -140,9 +140,9 @@ const resolvers = {
     newMessage: (game, args) => {
       const {playerId, text} = args;
       try {
-        game.newMessage(playerId,text);
+        const message = game.newMessage(playerId,text);
         persist(game,'update');
-        return game;
+        return message;
       } catch (e) {
         throw new ApolloError(e.message);
       }

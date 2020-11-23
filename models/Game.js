@@ -227,7 +227,9 @@ class Game {
 
   newMessage(playerId,text) {
     const when = new Date();
-    this.messages.push({when, playerId, text});
+    const message = {when, playerId, text};
+    this.messages.push(message);
+    return message;
   }
 }
 
