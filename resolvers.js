@@ -137,6 +137,16 @@ const resolvers = {
         throw new ApolloError(e.message);
       }
     },
+    newMessage: (game, args) => {
+      const {playerId, text} = args;
+      try {
+        const message = game.newMessage(playerId,text);
+        persist(game,'update');
+        return message;
+      } catch (e) {
+        throw new ApolloError(e.message);
+      }
+    }
   },
   Subscription: {
     allGamesPub: { // the list of games (for the home page)

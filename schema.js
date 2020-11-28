@@ -85,6 +85,7 @@ module.exports = `
     nobles: [Card!]!
     cardStacks(type: CardStackType): [CardStack!]!
     winner: Player
+    messages: [Message!]!
   }
 
   type Player {
@@ -94,6 +95,12 @@ module.exports = `
     purchasedCards: [Card!]!
     nobles: [Card!]!
     score: Int!
+  }
+
+  type Message {
+    when: String!
+    playerId: ID!
+    text: String!
   }
 
   type Query {
@@ -117,6 +124,10 @@ module.exports = `
       reserveCardById: ID
       reserveCardFromStack: CardStackType
     ): Game
+    newMessage(
+      playerId: ID!
+      text: String!
+    ): Message
   }
 
   type Subscription {

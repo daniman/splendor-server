@@ -51,6 +51,7 @@ class Game {
         },
       ];
       this.turns = [];
+      this.messages = [];
 
     } else { // Restore a game from redis
       this.id = backup.id;
@@ -92,6 +93,7 @@ class Game {
       }
 
       this.turns = backup.turns;
+      this.messages = backup.messages;
     }
   }
 
@@ -221,6 +223,13 @@ class Game {
         this.state = 'COMPLETE';
       this.winner = p;
     });
+  }
+
+  newMessage(playerId,text) {
+    const when = new Date();
+    const message = {when, playerId, text};
+    this.messages.push(message);
+    return message;
   }
 }
 

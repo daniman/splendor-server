@@ -12,7 +12,7 @@ $ redis-server
 
 Run the server for general development:
 ```
-node index.js
+$ node index.js
 ```
 
 **Note:** If you would like to use Apollo Studio to query `localhost:4000` and view metrics from your server, rather than GraphQL Playground, visit the [`splendor` graph's settings page](https://engine.apollographql.com/graph/splendor/settings) to get an API Key, then run your server with an `APOLLO_KEY`, like so:
